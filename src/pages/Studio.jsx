@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Zap, Send, ArrowLeft, Gamepad2, Globe, Sparkles, Code2, RotateCcw, Copy, Check, ChevronDown } from 'lucide-react';
+import { Zap, Send, ArrowLeft, Gamepad2, Globe, Sparkles, Code2, RotateCcw, Copy, Check, ChevronDown, History, Eye } from 'lucide-react';
+import VersionHistory from '../components/studio/VersionHistory';
+import LivePreview from '../components/studio/LivePreview';
+import DownloadButton from '../components/studio/DownloadButton';
 import { cn } from '@/lib/utils';
 
 const STARTERS = [
@@ -29,6 +32,10 @@ export default function Studio() {
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [copiedId, setCopiedId] = useState(null);
   const [showStarters, setShowStarters] = useState(true);
+  const [versions, setVersions] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewCode, setPreviewCode] = useState('');
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -80,7 +87,16 @@ Format your response in clear markdown sections. Be specific, technical, and act
 
     setIsBuilding(false);
     setPhase(null);
-    setMessages(prev => [...prev, { role: 'forge', content: result, id: Date.now() }]);
+    const forgeMsg = { role: 'forge', content: result, id: Date.now() };
+    setMessages(prev => [...prev, forgeMsg]);
+    setPreviewCode(result);
+    setVersions(prev => [{
+      id: Date.now(),
+      timestamp: new Date().toISOString(),
+      title: userMsg.slice(0, 60) + (userMsg.length > 60 ? '...' : ''),
+      prompt: userMsg,
+      content: result,
+    }, ...prev]);
   };
 
   const handleCopy = (id, text) => {
@@ -104,6 +120,24 @@ Format your response in clear markdown sections. Be specific, technical, and act
     setShowStarters(true);
     setPhase(null);
     setIsBuilding(false);
+    setVersions([]);
+    setPreviewCode('');
+    setShowPreview(false);
+    setShowHistory(false);
+  };
+
+  const handleRevert = (version) => {
+    const reverted = { role: 'forge', content: version.content, id: Date.now() };
+    setMessages(prev => [...prev.filter(m => m.role === 'user'), reverted]);
+    setPreviewCode(version.content);
+    setVersions(prev => [{
+      id: Date.now(),
+      timestamp: new Date().toISOString(),
+      title: `Reverted: ${version.title}`,
+      prompt: version.prompt,
+      content: version.content,
+    }, ...prev]);
+    setShowHistory(false);
   };
 
   return (
@@ -129,13 +163,36 @@ Format your response in clear markdown sections. Be specific, technical, and act
 
         <div className="flex items-center gap-2">
           {messages.length > 0 && (
-            <button
-              onClick={reset}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground border border-border hover:border-primary/30 rounded-lg transition-all"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">New Build</span>
-            </button>
+            <>
+              <DownloadButton messages={messages} buildTitle={versions[0]?.title} />
+              <button
+                onClick={() => { setShowHistory(h => !h); setShowPreview(false); }}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-lg transition-all',
+                  showHistory ? 'border-primary/40 text-primary bg-primary/10' : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/30'
+                )}
+              >
+                <History className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{versions.length}</span>
+              </button>
+              <button
+                onClick={() => { setShowPreview(p => !p); setShowHistory(false); }}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-lg transition-all',
+                  showPreview ? 'border-neon-cyan/40 text-neon-cyan bg-neon-cyan/10' : 'border-border text-muted-foreground hover:text-foreground hover:border-neon-cyan/30'
+                )}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Preview</span>
+              </button>
+              <button
+                onClick={reset}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground border border-border hover:border-primary/30 rounded-lg transition-all"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">New Build</span>
+              </button>
+            </>
           )}
           <div className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 rounded-lg border border-border text-xs text-muted-foreground">
             <span className="relative flex h-1.5 w-1.5">
@@ -146,6 +203,15 @@ Format your response in clear markdown sections. Be specific, technical, and act
           </div>
         </div>
       </header>
+
+      {/* Body: side panel + messages */}
+      <div className="flex flex-1 overflow-hidden">
+      {(showHistory || showPreview) && (
+        <div className="hidden lg:flex border-r border-border bg-surface-1 w-80 xl:w-96 flex-col overflow-hidden">
+          {showHistory && <VersionHistory versions={versions} onRevert={handleRevert} onClose={() => setShowHistory(false)} />}
+          {showPreview && <LivePreview code={previewCode} onClose={() => setShowPreview(false)} />}
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
@@ -242,6 +308,7 @@ Format your response in clear markdown sections. Be specific, technical, and act
 
           <div ref={bottomRef} />
         </div>
+      </div>
       </div>
 
       {/* Input */}
