@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Code2, Gamepad2, Globe, ArrowRight, Star, CheckCircle, Sparkles, Terminal, Layers, Shield } from 'lucide-react';
+import { Zap, Code2, Gamepad2, Globe, ArrowRight, Star, CheckCircle, Sparkles, Terminal, Layers, Shield, BookOpen } from 'lucide-react';
 import HeroOrb from '../components/HeroOrb';
 import FeatureCard from '../components/FeatureCard';
 import ProjectShowcase from '../components/ProjectShowcase';
@@ -98,7 +98,9 @@ export default function Home() {
         <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
           <a href="#features" className="hover:text-foreground transition-colors">Features</a>
           <a href="#showcase" className="hover:text-foreground transition-colors">Showcase</a>
-          <a href="#stats" className="hover:text-foreground transition-colors">Stats</a>
+          <Link to="/knowledge" className="hover:text-foreground transition-colors flex items-center gap-1">
+            <BookOpen className="w-3.5 h-3.5" /> Knowledge
+          </Link>
         </div>
 
         <Link
