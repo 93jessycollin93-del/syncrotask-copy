@@ -101,6 +101,7 @@ export default function Home() {
           <Link to="/knowledge" className="hover:text-foreground transition-colors flex items-center gap-1">
             <BookOpen className="w-3.5 h-3.5" /> Knowledge
           </Link>
+          <Link to="/tasks" className="hover:text-foreground transition-colors">Task Board</Link>
         </div>
 
         <Link

@@ -1,0 +1,53 @@
+{
+  "name": "Task",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "todo",
+        "in_progress",
+        "done"
+      ],
+      "default": "todo"
+    },
+    "priority": {
+      "type": "string",
+      "title": "Priority",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "prerequisites": {
+      "type": "array",
+      "title": "Prerequisites",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of tasks that must be completed before this task"
+    },
+    "assignee": {
+      "type": "string",
+      "title": "Assignee"
+    },
+    "due_date": {
+      "type": "string",
+      "title": "Due Date"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

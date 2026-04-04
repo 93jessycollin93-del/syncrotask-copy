@@ -6,6 +6,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 // Add page imports here
+import TaskBoard from './pages/TaskBoard';
 import Home from './pages/Home';
 import Studio from './pages/Studio';
 import KnowledgeBase from './pages/KnowledgeBase';
@@ -40,6 +41,7 @@ const AuthenticatedApp = () => {
       <Route path="/" element={<Home />} />
       <Route path="/studio" element={<Studio />} />
       <Route path="/knowledge" element={<KnowledgeBase />} />
+      <Route path="/tasks" element={<TaskBoard />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
